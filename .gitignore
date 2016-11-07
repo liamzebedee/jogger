@@ -1,0 +1,12 @@
+/jogger
+
+/NOTES
+
+/pkg/*
+/src/*
+
+/codeFile*
+
+tls/*
+
+letsencrypt_challenge/* 

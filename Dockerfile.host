@@ -1,0 +1,8 @@
+RUN sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable
+RUN sudo apt-get update && apt-get install golang unzip
+RUN wget https://github.com/joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12-linux_amd64.zip
+RUN unzip websocketd
+RUN git clone https://bitbucket.org/quberider/jogger
+RUN git submodule init
+RUN git submodule update
+RUN docker build -t jogger .

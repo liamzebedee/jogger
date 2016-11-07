@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/codemirror.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/codemirror.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/mode/python/python.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/theme/3024-day.css" />
+
+<script>
+
+$(document).ready(function(){
+
+
+  var codemirror = CodeMirror.fromTextArea($("#code")[0], {
+    value: 'print("Hello World")\nprint("To the moon!")',
+    mode: {
+      name: "text/x-python",
+      version: 2,
+      singleLineStringErrors: false
+    },
+    lineNumbers: true,
+    indentUnit: 4,
+    indentWithTabs: true,
+    matchBrackets: true
+  });
+
+
+  $('#runBtn').click(function(){
+    let code = codemirror.getValue();
+    
+    var ws = new WebSocket('ws://localhost:8080/');
+
+    ws.onopen = function() {
+      ws.send(JSON.stringify({ type: "send_code", body: code }));
+    };
+
+    ws.onclose = function() {
+
+    };
+
+    ws.onmessage = function(event) {
+      let msg = JSON.parse(event.data);
+      switch(msg.type){
+        case 'output':
+          $("#output").prepend('<br>').prepend(msg.body)
+          break;
+        case 'end_of_output':
+          $("#output").prepend('<br>').prepend("<strong>---</strong>").prepend('<br>')
+          break;
+        case 'error':
+          $("#output").prepend('<br>').prepend("<i>"+msg.body+"</i>").prepend('<br>')
+          break;
+        case 'waiting_for_input':
+          prompt();
+          break;
+      }
+    };
+
+  })
+
+
+})
+</script>
+
+
+
+    <title>Cuberider editor demo</title>
+  </head>
+
+  <body>
+
+
+    <div class="container" style='padding-top:1em'>
+
+      <div class='row' style='padding-bottom:2em'>
+        <div>
+          <button type="button" class="btn btn-primary" id='runBtn'>Run/Compile</button>
+        </div>
+      </div>
+
+      <div class="row">
+      
+        <div class='col-md-6'>
+<textarea id="code" style='min-height:20em;width:100%'>
+print("hey guys")
+print("we rock!")</textarea>
+        </div>
+
+        <div class='col-md-6'>
+          <pre id='output' style='min-height:20em'></pre>
+        </div>
+
+      </div>
+
+    </div><!-- /.container -->
+
+  </body>
+</html>
